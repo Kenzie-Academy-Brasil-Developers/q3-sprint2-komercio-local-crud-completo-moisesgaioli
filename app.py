@@ -1,4 +1,5 @@
-# Seu código aqui
+from flask import Flask, json, jsonify, request
+
 produtos = [
     {"id": 1, "name": "sabonete", "price": 5.99},
     {"id": 2, "name": "perfume", "price": 39.90},
@@ -31,3 +32,47 @@ produtos = [
     {"id": 29, "name": "coberta", "price": 55.99},
     {"id": 30, "name": "sofa", "price": 600.15}
 ]
+
+app = Flask(__name__)
+
+@app.get('/products')
+def list_products():
+    return jsonify(produtos), '200 - OK'
+
+
+@app.get('/products/<product_id>')
+def get(product_id: int):
+    product_filtred = [produto for produto in produtos if produto['id'] == int(product_id)]
+    return jsonify(product_filtred), 200
+
+
+@app.post('/products')
+def create():
+    new_product = {'id': 31, 'name': request.json['name'], 'price': request.json['price']}
+    produtos.append(new_product)
+    return jsonify(new_product), '201 - CREATED'
+
+
+@app.patch('/products/<product_id>')
+def update(product_id: int):
+    name = ''
+    price = ''    
+    product_filtred = [produto for produto in produtos if produto['id'] == int(product_id)]
+
+    if name and price:
+        product_edited = {'id': product_filtred[0]['id'], 'name': name, 'price': price}
+         
+    elif price:
+        product_edited = {'id': product_filtred[0]['id'], 'name': product_filtred[0]['name'], 'price': price}
+        
+    elif name:
+        product_edited = {'id': product_filtred[0]['id'], 'name': name, 'price': product_filtred[0]['price']}
+        
+    return {}, '204 - NO CONTENT'
+
+
+@app.delete('/products/<product_id>')
+def delete(product_id: int):
+    product_filtred = [produto for produto in produtos if produto['id'] == int(product_id)]
+    produtos.remove(product_filtred[0])
+    return {}, '204 - NO CONTENT'
